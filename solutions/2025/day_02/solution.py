@@ -52,7 +52,6 @@ class Solution(StrSplitSolution):
         
         candidates = list(candidates)
         candidates.sort(reverse = True)
-        print(candidates[0])
 
         while self.input and candidates:
             lower, upper = self.input[-1]
