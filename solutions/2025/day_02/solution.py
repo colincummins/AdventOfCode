@@ -42,7 +42,6 @@ class Solution(StrSplitSolution):
         result = 0
         candidates = set()
         upperLimit = self.input[0][1]
-        print(upperLimit)
         for s in range(1, 99999):
             pattern = str(s)
             candidate = pattern * 2
