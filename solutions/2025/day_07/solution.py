@@ -9,17 +9,6 @@ from collections import deque
 class Solution(StrSplitSolution):
     _year = 2025
     _day = 7
-
-    def parseInput(self):
-        buffer = []
-        for row in self.input:
-            num = 0
-            for i, node in enumerate(row):
-                if node != ".":
-                    num |= 1 << i
-            buffer.append(num)
-        self.input = buffer
-
     # @answer(1234)
     def part_1(self) -> int:
         pass
@@ -30,26 +19,23 @@ class Solution(StrSplitSolution):
 
     #@answer((1234, 4567))
     def solve(self) -> tuple[int, int]:
-        self.parseInput()
-        print(self.input)
-        maxDepth = len(self.input) - 1
-        print(maxDepth)
-        split = 0
-        q = deque()
-        q.append((0, self.input[0]))
-        #clear first row so it's not interpreted as a reflector
-        self.input[0] = 0
-        while q:
-            buffer = 0
-            depth, row = q.popleft()
-            print(depth)
-            collisions = row & self.input[depth]
-            split += collisions.bit_count()
-            row ^= collisions
-            row |= collisions << 1
-            row |= collisions >> 1
-            if depth < maxDepth:
-                q.append((depth + 1, row))
 
-        return (split, 0)
+        rowLength = len(self.input[0])
+        split = 0
+        curr = [0] * rowLength
+        curr[self.input[0].find("S")] = 1
+
+        for row in self.input[1:]:
+            buffer = [0] * rowLength
+            for i in range(rowLength):
+                if row[i]=="^" and curr[i] > 0:
+                    buffer[i + 1] += curr[i]
+                    buffer[i - 1] += curr[i]
+                    split += 1
+                elif curr[i]:
+                    buffer[i] += curr[i]
+            curr = buffer
+
+
+        return (split, sum(curr))
 
