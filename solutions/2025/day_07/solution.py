@@ -17,7 +17,7 @@ class Solution(StrSplitSolution):
     def part_2(self) -> int:
         pass
 
-    #@answer((1234, 4567))
+    @answer((1651, 108924003331749))
     def solve(self) -> tuple[int, int]:
 
         rowLength = len(self.input[0])
@@ -25,7 +25,7 @@ class Solution(StrSplitSolution):
         curr = [0] * rowLength
         curr[self.input[0].find("S")] = 1
 
-        for row in self.input[1:]:
+        for row in self.input:
             buffer = [0] * rowLength
             for i in range(rowLength):
                 if row[i]=="^" and curr[i] > 0:
