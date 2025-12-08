@@ -62,7 +62,7 @@ class Solution(StrSplitSolution):
     def part_2(self) -> int:
         pass
 
-    @answer((123420, 0))
+    @answer((123420, 673096646))
     def solve(self) -> tuple[int, int]:
         self.parseInput()
         uf = UnionFind(self.input)
@@ -81,10 +81,16 @@ class Solution(StrSplitSolution):
                 distances.append((dist, self.input[i], self.input[j]))
         distances.sort()
 
-        for dist, x, y in distances[:1000]:
-            uf.union(x, y)
+        cordsUsed = 0
+        for dist, x, y in distances:
+            cordsUsed += 1
+            connected = uf.union(x, y)
+            if cordsUsed == 1000:
+                part1 =reduce(lambda x, y: x * y, sorted(uf.size.values(), reverse = True)[:3]) 
+            if connected == len(self.input):
+                part2 = x[0] * y[0]
 
-        return (reduce(lambda x, y: x * y, sorted(uf.size.values(), reverse = True)[:3]), 0)
+        return (part1, part2)
 
         
 
