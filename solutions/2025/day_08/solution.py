@@ -3,8 +3,10 @@
 # puzzle prompt: https://adventofcode.com/2025/day/8
 
 from ...base import StrSplitSolution, answer
-from math import sqrt
-from functools import reduce
+from math import sqrt, prod
+from heapq import heapify, heappop
+from itertools import combinations
+from dataclasses import dataclass
 
 class UnionFind():
     def __init__(self, elements):
@@ -35,6 +37,27 @@ class UnionFind():
         self.parent[y] = x
         return self.size[x]
 
+@dataclass
+class Point():
+    x: int
+    y: int
+    z: int
+
+    def __sub__(self, other):
+        return ((self.x - other.x)**2 + (self.y - other.y)**2 + (self.z - other.z)**2)**0.5
+
+@dataclass
+class Pair():
+    a: Point
+    b: Point
+
+    def __post_init__(self):
+        self.dist = self.a - self.b
+
+    def __hash__(self):
+        return (self.dist, self.a, self.b)
+
+
 class Solution(StrSplitSolution):
     _year = 2025
     _day = 8
@@ -51,14 +74,9 @@ class Solution(StrSplitSolution):
 
     @answer((123420, 673096646))
     def solve(self) -> tuple[int, int]:
+        part1 = part2 = 0
         self.parseInput()
         uf = UnionFind(self.input)
-        """
-        assert(uf.find(self.input[0])==self.input[0])
-        uf.union(self.input[0], self.input[1])
-        assert(uf.find(self.input[0]) == uf.find(self.input[1]))
-        print(uf.size)
-        """
         distances = []
         for i in range(len(self.input) - 1):
             for j in range(i + 1,len(self.input)):
@@ -66,14 +84,15 @@ class Solution(StrSplitSolution):
                 b1, b2, b3 = self.input[j]
                 dist = sqrt((a1 - b1)**2 + (a2 - b2)**2 + (a3 - b3)**2)
                 distances.append((dist, self.input[i], self.input[j]))
-        distances.sort()
+        heapify(distances)
 
         cordsUsed = 0
-        for dist, x, y in distances:
+        while distances and not (part1 and part2):
+            dist, x, y = heappop(distances)
             cordsUsed += 1
             connected = uf.union(x, y)
             if cordsUsed == 1000:
-                part1 =reduce(lambda x, y: x * y, sorted(uf.size.values(), reverse = True)[:3]) 
+                part1 =prod(sorted(uf.size.values(), reverse = True)[:3])
             if connected == len(self.input):
                 part2 = x[0] * y[0]
 
