@@ -6,7 +6,7 @@ from ...base import StrSplitSolution, answer
 from math import sqrt, prod
 from heapq import heapify, heappop
 from itertools import combinations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 class UnionFind():
     def __init__(self, elements):
@@ -46,13 +46,17 @@ class Point():
     def __sub__(self, other):
         return ((self.x - other.x)**2 + (self.y - other.y)**2 + (self.z - other.z)**2)**0.5
 
-@dataclass(frozen=True)
+@dataclass(order=True)
 class Pair():
+    dist: int = field(init=False)
     a: Point
     b: Point
 
     def __post_init__(self):
         self.dist = self.a - self.b
+
+    def __iter__(self):
+        return iter((self.dist, self.a, self.b))
 
 
 class Solution(StrSplitSolution):
@@ -75,7 +79,7 @@ class Solution(StrSplitSolution):
         self.parseInput()
         uf = UnionFind(self.input)
 
-        distances = [(a - b, a, b) for a, b in combinations(self.input, 2)]
+        distances = [Pair(a, b) for a, b in combinations(self.input, 2)]
         heapify(distances)
 
         cordsUsed = 0
