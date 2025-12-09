@@ -28,7 +28,14 @@ class Solution(StrSplitSolution):
     
     @cache
     def recFindRectangles(self, upper: int, lower: int, left: int, right: int) -> int:
+        print(len(self.memo))
+        hash = (upper, lower, left, right)
+
+        if self.memo.get(hash) is not None:
+            return self.memo.get(hash)
+
         if upper > lower or left > right:
+            self.memo[hash] = 0
             return 0
 
         upperLeft = self.createPointFromIndex(left, upper)
@@ -39,16 +46,17 @@ class Solution(StrSplitSolution):
         opposite2 = set([lowerLeft, upperRight])
 
         if opposite1.issubset(self.allRedTiles) or opposite2.issubset(self.allRedTiles):
-            self.maxRect = max(self.maxRect, self.getRectangleArea(upperLeft, lowerRight))
-            print(self.maxRect)
-            return
+            self.memo[hash] = self.getRectangleArea(upperLeft, lowerRight)
+            return self.memo[hash]
 
-        self.recFindRectangles(upper + 1, lower, left, right)
-        self.recFindRectangles(upper, lower - 1, left, right)
-        self.recFindRectangles(upper, lower, left + 1, right)
-        self.recFindRectangles(upper, lower, left, right - 1)
+        bestRectangle = max([
+        self.recFindRectangles(upper + 1, lower, left, right),
+        self.recFindRectangles(upper, lower - 1, left, right),
+        self.recFindRectangles(upper, lower, left + 1, right),
+        self.recFindRectangles(upper, lower, left, right - 1)])
 
-        return
+        self.memo[hash] = bestRectangle
+        return bestRectangle
 
 
     # @answer(1234)
@@ -61,6 +69,7 @@ class Solution(StrSplitSolution):
 
     # @answer((1234, 4567))
     def solve(self) -> tuple[int, int]:
+        self.memo = {}
         self.maxRect = 0
         self.parseInput()
         self.allRedTiles = set()
@@ -72,11 +81,8 @@ class Solution(StrSplitSolution):
             self.yCoords.add(coord.y)
         self.xCoords = sorted(self.xCoords)
         self.yCoords = sorted(self.yCoords)
-        print(self.xCoords)
-        print(self.yCoords)
 
-        self.recFindRectangles(0, len(self.yCoords) - 1, 0, len(self.xCoords) - 1)
-        return (self.maxRect, 0)
+        return (self.recFindRectangles(0, len(self.yCoords) - 1, 0, len(self.xCoords) - 1), 0)
 
 
             
