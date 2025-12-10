@@ -31,7 +31,12 @@ class Solution(StrSplitSolution):
         hash = (upper, lower, left, right)
 
         if self.memo.get(hash) is not None:
+            print("already seen", hash)
             return self.memo.get(hash)
+
+        if upper > lower or left > right:
+            self.memo[hash] = 0
+            return 0
 
 
         upperLeft = self.createPointFromIndex(left, upper)
@@ -41,7 +46,7 @@ class Solution(StrSplitSolution):
         upperRight = self.createPointFromIndex(right, upper)
         opposite2 = set([lowerLeft, upperRight])
 
-        if upper > lower or left > right or (self.memo.values() and self.getRectangleArea(upperLeft, lowerRight) < max(self.memo.values())):
+        if self.memo.values() and self.getRectangleArea(upperLeft, lowerRight) <= max(self.memo.values()):
             self.memo[hash] = 0
             return 0
 
