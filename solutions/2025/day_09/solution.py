@@ -6,14 +6,31 @@ from ...base import StrSplitSolution, answer
 from collections import namedtuple
 from dataclasses import dataclass
 from functools import cache
+from math import sqrt, atan2
 
 @dataclass(frozen=True)
 class Point():
     x: int
     y: int
 
-    def __mul__(self, other) -> int:
+    def getRectArea(self, other) -> int:
+        # Area of a rectangle from opposite corners
         return (abs(self.x - other.x) + 1) * (abs(self.y - other.y) + 1)
+
+    def __sub__(self, other) -> int:
+        # Euclidian Distance
+        return sqrt((self.x - other.x)**2 + (self.y - other.y)**2)
+
+@dataclass(frozen=True)
+class Vector():
+    start: Point
+    end: Point
+
+    #cross product self x other
+    def __mul__(self, other) -> int:
+        pass
+
+
 
 
 
