@@ -7,7 +7,8 @@ from collections import namedtuple
 from dataclasses import dataclass
 from functools import cache
 from math import sqrt, atan2
-import ...utils.vectors
+from ...utils.vectors import Point 
+from itertools import combinations
 
 
 
@@ -29,8 +30,12 @@ class Solution(StrSplitSolution):
 
     # @answer((1234, 4567))
     def solve(self) -> tuple[int, int]:
-        unittest.main()
+        part1 = 0
         self.parseInput()
+        for a, b in combinations(self.input, 2):
+            part1 = max(part1, a.getRectArea(b))
+        
+        return (part1,0)
         
 
 
