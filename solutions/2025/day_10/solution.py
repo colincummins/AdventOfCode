@@ -39,17 +39,6 @@ class Solution(StrSplitSolution):
 
     # @answer((1234, 4567))
     def solve(self) -> tuple[int, int]:
-        """
-        reg = Register([0, 1, 4])
-        reg2 = Register([])
-        print(reg)
-        print(reg2)
-        reg2 ^= reg
-        print(reg)
-        print(reg2)
-        reg2 ^= reg
-        print(reg2)
-        """
         totalPresses = 0
         for line in self.input:
             self.debug("New Line:")
