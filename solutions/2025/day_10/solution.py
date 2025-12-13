@@ -3,7 +3,9 @@
 # puzzle prompt: https://adventofcode.com/2025/day/10
 
 from ...base import StrSplitSolution, answer
-from collections import deque
+from collections import deque, defaultdict
+from heapq import heappush, heappop
+from math import inf
 
 
 class Solution(StrSplitSolution):
@@ -22,9 +24,12 @@ class Solution(StrSplitSolution):
             for reg in map(int, button.strip("()").split(",")):
                 val |= 1 << reg
             buttons.append(val)
-        joltages = map(int, elements[-1].strip("{}").split(","))
+        joltages = tuple(map(int, elements[-1].strip("{}").split(",")))
 
         return lights, buttons, joltages
+
+    def parseInput(self):
+        self.input = [self.parseLine(line) for line in self.input]
 
 
 
@@ -39,11 +44,9 @@ class Solution(StrSplitSolution):
 
     # @answer((1234, 4567))
     def solve(self) -> tuple[int, int]:
-        totalPresses = 0
-        for line in self.input:
-            self.debug("New Line:")
-            lights, buttons, joltages = self.parseLine(line)
-            self.debug("Lights:", lights, "Buttons:", buttons, "Joltages:", *joltages)
+        part1 = 0
+        self.parseInput()
+        for lights, buttons, joltages in self.input:
             visited = set()
             q = deque([(0, 0)])
             while q:
@@ -54,10 +57,58 @@ class Solution(StrSplitSolution):
                 visited.add(curr)
                 if curr == lights:
                     self.debug(steps)
-                    totalPresses += steps
+                    part1 += steps
                     break
                 for button in buttons:
                     q.append((steps + 1, button ^ curr))
 
-        return (totalPresses, 0)
+        #part 2
+        part2 = 0
+        for _, buttons, joltages in self.input:
+            self.debug("New Line:")
+            visited = set()
+
+            dist = defaultdict(lambda: inf)
+            astar = defaultdict(lambda: inf)
+
+            dist[joltages] = 0
+            astar[joltages] = sum(joltages)
+
+            # AStar Distance, Current Distance, Joltages
+            heap = [(0, 0, tuple(joltages))]
+            visited = set()
+
+            while heap:
+                self.debug("Lights:", lights, "Buttons:", buttons, "Joltages:", *joltages)
+                currAStar, currDist, joltages = heappop(heap)
+                visited.add(joltages)
+                if all(x == 0 for x in joltages):
+                    part2 += currDist
+                    break
+                for button in buttons:
+                    neighbor = list(joltages)
+                    digit = 0
+                    while button != 0:
+                        self.debug("Button:", button)
+                        if button & 1:
+                            neighbor[digit] -= 1
+                        button >>= 1 
+                        digit += 1
+                    if any(x < 0 for x in neighbor):
+                        continue
+                    neighbor = tuple(neighbor)
+                    if dist[joltages] + 1 < dist[neighbor]:
+                        dist[neighbor] = dist[joltages] + 1
+                        astar[neighbor] = dist[joltages] + 1 + sum(neighbor)
+                        if neighbor not in visited:
+                            heappush(heap, (astar[neighbor], dist[neighbor], neighbor))
+
+
+
+
+
+            # Remember - no negative joltages allowed
+
+
+        return (part1, part2)
 
