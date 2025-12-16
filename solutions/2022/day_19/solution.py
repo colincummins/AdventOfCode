@@ -61,6 +61,8 @@ class Solution(StrSplitSolution):
 
             # Wait and build geodebot
 
+            # Wait until last turn
+
             # Build geodes
             if (clay < maxClayCost and clayBot < maxClayCost) or (obsidianBot and obsidian < maxObsidianCost and obsidianBot < maxObsidianCost):
                 scenarios.append(tryBlueprint(oreBot, clayBot, obsidianBot, geodeBot, ore + oreBot, clay + clayBot, obsidian + obsidianBot, geodes + geodeBot, turns + 1))
