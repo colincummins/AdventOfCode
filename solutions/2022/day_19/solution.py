@@ -35,24 +35,21 @@ class Solution(StrSplitSolution):
                 return tryBlueprint(oreBot, clayBot, obsidianBot, geodeBot + 1, ore + oreBot - geodeRobotOreCost, clay + clayBot, obsidian + obsidianBot - geodeRobotObsidianCost, geodes + geodeBot, turns + 1)
 
 
-            buildOreBot = 0
-            buildClayBot = 0
-            buildObsidianBot = 0
-            wait = 0
+            scenarios = [0]
 
             if ore >= oreRobotCost and oreBot <= max(obsidianRobotOreCost, geodeRobotOreCost):
-                buildOreBot = tryBlueprint(oreBot + 1, clayBot, obsidianBot, geodeBot, ore + oreBot - oreRobotCost, clay + clayBot, obsidian + obsidianBot, geodes + geodeBot, turns + 1)
+                scenarios.append(tryBlueprint(oreBot + 1, clayBot, obsidianBot, geodeBot, ore + oreBot - oreRobotCost, clay + clayBot, obsidian + obsidianBot, geodes + geodeBot, turns + 1))
 
             if ore >= clayRobotCost and clayBot <= obsidianRobotClayCost:
-                buildClayBot = tryBlueprint(oreBot, clayBot + 1, obsidianBot, geodeBot, ore + oreBot - clayRobotCost, clay + clayBot, obsidian + obsidianBot, geodes + geodeBot, turns + 1)
+                scenarios.append(tryBlueprint(oreBot, clayBot + 1, obsidianBot, geodeBot, ore + oreBot - clayRobotCost, clay + clayBot, obsidian + obsidianBot, geodes + geodeBot, turns + 1))
 
             if ore >= obsidianRobotOreCost and clay >= obsidianRobotClayCost and obsidianBot <= geodeRobotObsidianCost:
-                buildObsidianBot = tryBlueprint(oreBot, clayBot, obsidianBot + 1, geodeBot, ore + oreBot - obsidianRobotOreCost, clay + clayBot - obsidianRobotClayCost, obsidian + obsidianBot, geodes + geodeBot, turns + 1)
+                scenarios.append(tryBlueprint(oreBot, clayBot, obsidianBot + 1, geodeBot, ore + oreBot - obsidianRobotOreCost, clay + clayBot - obsidianRobotClayCost, obsidian + obsidianBot, geodes + geodeBot, turns + 1))
 
             if (clayBot == 0) or (ore < maxOreCost and oreBot < maxOreCost) or (clay < maxClayCost and clayBot < maxClayCost) or (obsidianBot and obsidian < maxObsidianCost and obsidianBot < maxObsidianCost):
-                wait = tryBlueprint(oreBot, clayBot, obsidianBot, geodeBot, ore + oreBot, clay + clayBot, obsidian + obsidianBot, geodes + geodeBot, turns + 1)
+                scenarios.append(tryBlueprint(oreBot, clayBot, obsidianBot, geodeBot, ore + oreBot, clay + clayBot, obsidian + obsidianBot, geodes + geodeBot, turns + 1))
 
-            return max(wait, buildOreBot, buildClayBot, buildObsidianBot)
+            return max(scenarios)
             
         part1 = 0
         TURN_LIMIT = 25
