@@ -68,6 +68,7 @@ class Solution(StrSplitSolution):
             part1 += buildResult * blueprintNum
 
         part2 = 1
+        """
         TURN_LIMIT = 32
         for line in self.input[:3]:
             tryBlueprint.cache_clear()
@@ -79,4 +80,5 @@ class Solution(StrSplitSolution):
             buildResult = tryBlueprint(1, 0, 0, 0, 0, 0, 0, 0, 1) 
             print("Blueprint: ", blueprintNum, " resulted in", buildResult, " geodes")
             part2 *= buildResult
+            """
         return part1, part2
