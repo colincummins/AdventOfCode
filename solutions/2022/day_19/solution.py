@@ -24,18 +24,14 @@ class Solution(StrSplitSolution):
 
     # @answer((1234, 4567))
     def solve(self) -> tuple[int, int]:
-        TURN_LIMIT = 25
 
         @cache
         def tryBlueprint(oreBot, clayBot, obsidianBot, geodeBot, ore, clay, obsidian, geodes, turns) -> int:
             assert(all([x >= 0 for x in [ore, clay, obsidian, geodes]]))
-            print(oreBot, clayBot, obsidianBot, geodeBot, ore, clay, obsidian, geodes, turns)
             if turns == TURN_LIMIT:
-                print("Time Limit Reached: ", oreBot, clayBot, obsidianBot, geodeBot, ore, clay, obsidian, geodes)
                 return geodes
 
             if geodeRobotOreCost <= ore and geodeRobotObsidianCost <= obsidian:
-                print("Building Geode Bot")
                 return tryBlueprint(oreBot, clayBot, obsidianBot, geodeBot + 1, ore + oreBot - geodeRobotOreCost, clay + clayBot, obsidian + obsidianBot - geodeRobotObsidianCost, geodes + geodeBot, turns + 1)
 
 
@@ -45,26 +41,42 @@ class Solution(StrSplitSolution):
             wait = 0
 
             if ore >= oreRobotCost and oreBot <= max(obsidianRobotOreCost, geodeRobotOreCost):
-                print("Trying to build oreBot")
                 buildOreBot = tryBlueprint(oreBot + 1, clayBot, obsidianBot, geodeBot, ore + oreBot - oreRobotCost, clay + clayBot, obsidian + obsidianBot, geodes + geodeBot, turns + 1)
 
             if ore >= clayRobotCost and clayBot <= obsidianRobotClayCost:
-                print("Trying to build clayBot")
                 buildClayBot = tryBlueprint(oreBot, clayBot + 1, obsidianBot, geodeBot, ore + oreBot - clayRobotCost, clay + clayBot, obsidian + obsidianBot, geodes + geodeBot, turns + 1)
 
             if ore >= obsidianRobotOreCost and clay >= obsidianRobotClayCost and obsidianBot <= geodeRobotObsidianCost:
-                print("Trying to build obsidianBot")
                 buildObsidianBot = tryBlueprint(oreBot, clayBot, obsidianBot + 1, geodeBot, ore + oreBot - obsidianRobotOreCost, clay + clayBot - obsidianRobotClayCost, obsidian + obsidianBot, geodes + geodeBot, turns + 1)
 
-            if all([x <= hoarding for x in [ore, clay, obsidian]]) and geodeBot == 0:
-                print("Try waiting...")
+            if (oreBot == 0) or (oreBot > 0 and ore < maxOreCost) or (clayBot and clay < maxClayCost) or (obsidianBot and obsidian < maxObsidianCost):
                 wait = tryBlueprint(oreBot, clayBot, obsidianBot, geodeBot, ore + oreBot, clay + clayBot, obsidian + obsidianBot, geodes + geodeBot, turns + 1)
 
             return max(wait, buildOreBot, buildClayBot, buildObsidianBot)
             
         part1 = 0
-        line = self.input[0]
-        blueprintNum, oreRobotCost, clayRobotCost, obsidianRobotOreCost, obsidianRobotClayCost, geodeRobotOreCost, geodeRobotObsidianCost = self.extractNums(line)
-        hoarding = max(oreRobotCost, clayRobotCost, obsidianRobotClayCost, obsidianRobotOreCost, geodeRobotObsidianCost, geodeRobotOreCost) + 1
-        print("Hoarding Limits:", hoarding)
-        return tryBlueprint(1, 0, 0, 0, 0, 0, 0, 0, 1), 0
+        TURN_LIMIT = 25
+        for line in self.input:
+            tryBlueprint.cache_clear()
+            blueprintNum, oreRobotCost, clayRobotCost, obsidianRobotOreCost, obsidianRobotClayCost, geodeRobotOreCost, geodeRobotObsidianCost = self.extractNums(line)
+            maxOreCost = max(oreRobotCost, clayRobotCost, obsidianRobotOreCost, geodeRobotOreCost)
+            maxClayCost = obsidianRobotClayCost
+            maxObsidianCost = geodeRobotObsidianCost
+
+            buildResult = tryBlueprint(1, 0, 0, 0, 0, 0, 0, 0, 1) 
+            print("Blueprint: ", blueprintNum, " resulted in", buildResult, " geodes")
+            part1 += buildResult * blueprintNum
+
+        part2 = 1
+        TURN_LIMIT = 32
+        for line in self.input[:3]:
+            tryBlueprint.cache_clear()
+            blueprintNum, oreRobotCost, clayRobotCost, obsidianRobotOreCost, obsidianRobotClayCost, geodeRobotOreCost, geodeRobotObsidianCost = self.extractNums(line)
+            maxOreCost = max(oreRobotCost, clayRobotCost, obsidianRobotOreCost, geodeRobotOreCost)
+            maxClayCost = obsidianRobotClayCost
+            maxObsidianCost = geodeRobotObsidianCost
+
+            buildResult = tryBlueprint(1, 0, 0, 0, 0, 0, 0, 0, 1) 
+            print("Blueprint: ", blueprintNum, " resulted in", buildResult, " geodes")
+            part2 *= buildResult
+        return part1, part2
