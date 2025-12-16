@@ -31,6 +31,9 @@ class Solution(StrSplitSolution):
             if turns == TURN_LIMIT:
                 return geodes
 
+            if turns > TURN_LIMIT:
+                return 0
+
             if geodeRobotOreCost <= ore and geodeRobotObsidianCost <= obsidian:
                 return tryBlueprint(oreBot, clayBot, obsidianBot, geodeBot + 1, ore + oreBot - geodeRobotOreCost, clay + clayBot, obsidian + obsidianBot - geodeRobotObsidianCost, geodes + geodeBot, turns + 1)
 
