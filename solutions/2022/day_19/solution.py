@@ -44,7 +44,7 @@ class Solution(StrSplitSolution):
 
 
             # Wait and build orebot
-            if oreBot < max(obsidianRobotOreCost, geodeRobotOreCost):
+            if oreBot < max(obsidianRobotOreCost, geodeRobotOreCost, clayRobotCost):
                 turnsNeeded = max(0,ceil((oreRobotCost - ore) / oreBot)) + 1
                 scenarios.append(tryBlueprint(oreBot + 1, clayBot, obsidianBot, geodeBot, ore + (turnsNeeded * oreBot) - oreRobotCost, clay + turnsNeeded * clayBot, obsidian + turnsNeeded * obsidianBot, geodes + geodeBot * turnsNeeded, turns + turnsNeeded))
 
