@@ -43,29 +43,32 @@ class Solution(StrSplitSolution):
 
 
 
-            if ore >= obsidianRobotOreCost and clay >= obsidianRobotClayCost and obsidianBot <= geodeRobotObsidianCost:
-                scenarios.append(tryBlueprint(oreBot, clayBot, obsidianBot + 1, geodeBot, ore + oreBot - obsidianRobotOreCost, clay + clayBot - obsidianRobotClayCost, obsidian + obsidianBot, geodes + geodeBot, turns + 1))
-
             # Wait and build orebot
-            if oreBot <= max(obsidianRobotOreCost, geodeRobotOreCost):
+            if oreBot < max(obsidianRobotOreCost, geodeRobotOreCost):
                 turnsNeeded = max(0,ceil((oreRobotCost - ore) / oreBot)) + 1
                 scenarios.append(tryBlueprint(oreBot + 1, clayBot, obsidianBot, geodeBot, ore + (turnsNeeded * oreBot) - oreRobotCost, clay + turnsNeeded * clayBot, obsidian + turnsNeeded * obsidianBot, geodes + geodeBot * turnsNeeded, turns + turnsNeeded))
 
             # Wait and build claybot
-            if clayBot <= obsidianRobotClayCost:
+            if oreBot and clayBot < obsidianRobotClayCost:
                 turnsNeeded = max(0, ceil((clayRobotCost - ore) / oreBot)) + 1
                 scenarios.append(tryBlueprint(oreBot, clayBot + 1, obsidianBot, geodeBot, ore + (turnsNeeded * oreBot)- clayRobotCost, clay + turnsNeeded * clayBot, obsidian + turnsNeeded * obsidianBot, geodes + geodeBot * turnsNeeded, turns + turnsNeeded))
 
 
             # Wait and build obsidianbot
+            if oreBot and clayBot and obsidianBot < geodeRobotObsidianCost:
+                turnsNeeded = max(0, ceil((obsidianRobotOreCost - ore) / oreBot), ceil((obsidianRobotClayCost - clay)/clayBot)) + 1
+                scenarios.append(tryBlueprint(oreBot, clayBot, obsidianBot + 1, geodeBot, ore + (turnsNeeded * oreBot)- obsidianRobotOreCost, clay + (turnsNeeded * clayBot) - obsidianRobotClayCost, obsidian + turnsNeeded * obsidianBot, geodes + geodeBot * turnsNeeded, turns + turnsNeeded))
 
             # Wait and build geodebot
+            if oreBot and obsidianBot:
+                turnsNeeded = max(0, ceil((geodeRobotOreCost - ore) / oreBot), ceil((geodeRobotObsidianCost - obsidian)/obsidianBot)) + 1
+                scenarios.append(tryBlueprint(oreBot, clayBot, obsidianBot, geodeBot + 1, ore + (turnsNeeded * oreBot)- geodeRobotOreCost, clay + turnsNeeded * clayBot, obsidian + turnsNeeded * obsidianBot - geodeRobotObsidianCost, geodes + geodeBot * turnsNeeded, turns + turnsNeeded))
 
             # Wait until last turn
+            if geodeBot:
+                turnsNeeded = TURN_LIMIT - turns
+                scenarios.append(tryBlueprint(oreBot, clayBot, obsidianBot, geodeBot, ore + (turnsNeeded * oreBot), clay + turnsNeeded * clayBot, obsidian + turnsNeeded * obsidianBot, geodes + geodeBot * turnsNeeded, turns + turnsNeeded))
 
-            # Build geodes
-            if (clay < maxClayCost and clayBot < maxClayCost) or (obsidianBot and obsidian < maxObsidianCost and obsidianBot < maxObsidianCost):
-                scenarios.append(tryBlueprint(oreBot, clayBot, obsidianBot, geodeBot, ore + oreBot, clay + clayBot, obsidian + obsidianBot, geodes + geodeBot, turns + 1))
 
             return max(scenarios)
             
@@ -74,10 +77,6 @@ class Solution(StrSplitSolution):
         for line in self.input:
             tryBlueprint.cache_clear()
             blueprintNum, oreRobotCost, clayRobotCost, obsidianRobotOreCost, obsidianRobotClayCost, geodeRobotOreCost, geodeRobotObsidianCost = self.extractNums(line)
-            maxOreCost = max(oreRobotCost, clayRobotCost, obsidianRobotOreCost, geodeRobotOreCost)
-            maxClayCost = obsidianRobotClayCost
-            maxObsidianCost = geodeRobotObsidianCost
-
             buildResult = tryBlueprint(1, 0, 0, 0, 0, 0, 0, 0, 1) 
             print("Blueprint: ", blueprintNum, " resulted in", buildResult, " geodes")
             part1 += buildResult * blueprintNum
