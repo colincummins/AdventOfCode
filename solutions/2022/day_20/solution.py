@@ -11,7 +11,7 @@ class DllNode():
         self.prev = prev
         self.next = next
     
-    def remove(self):
+    def pop(self):
         self.prev.next = self.next
         self.next.prev = self.prev
 
@@ -69,7 +69,7 @@ class DoublyLinkedList():
             return
         node = self.nodeDict[index]
         ptr = node.prev
-        node.remove()
+        node.pop()
         while offset != 0:
             offset -= 1
             ptr = ptr.next
