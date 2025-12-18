@@ -3,130 +3,42 @@
 # puzzle prompt: https://adventofcode.com/2022/day/20
 
 from ...base import IntSplitSolution, answer
-
-class DllNode():
-    def __init__(self, originalPos = None, val= None, prev = None, next = None):
-        self.originalPos = originalPos
-        self.val = val
-        self.prev = prev
-        self.next = next
-    
-    def pop(self):
-        self.prev.next = self.next
-        self.next.prev = self.prev
-
-    def __hash__(self):
-        return self.originalPos
-
-    def __repr__(self):
-        return "pos:" + self.originalPos + " val: " + self.val
-
-    def __str__(self):
-        return "{}".format(self.val)
-    
-
-class DoublyLinkedList():
-    def __init__(self, nodevals):
-        self.nodes = []
-        for i, num in enumerate(nodevals):
-            self.nodes.append(DllNode(i, num))
-
-        for i in range(len(self.nodes) - 1):
-            self.nodes[i].next = self.nodes[i+1]
-
-        for i in range(1, len(self.nodes)):
-            self.nodes[i].prev = self.nodes[i - 1]
-
-        self.nodes[-1].next = self.nodes[0]
-        self.nodes[0].prev = self.nodes[-1]
-
-        self.nodeDict = {hash(node): node for node in self.nodes}
-        self.head = self.nodes[0]
-        self.pointer = self.head
-    
-    def __str__(self):
-        builder = []
-        curr = self.head
-        for i in range(len(self.nodes)):
-            builder.append(str(curr))
-            curr = curr.next
-        return " <-> ".join(builder)
-
-
-    def __len__(self) -> int:
-        return len(self.nodes)
-
-    def insert(self, nodeToInsert, trailingNode):
-        leadingNode = trailingNode.next
-        trailingNode.next = nodeToInsert
-        nodeToInsert.prev = trailingNode
-        leadingNode.prev = nodeToInsert
-        nodeToInsert.next = leadingNode
-
-    def shift(self, index: int, offset: int):
-        offset %= (len(self) - 1) 
-        if offset == 0:
-            return
-        node = self.nodeDict[index]
-        ptr = node.prev
-        node.pop()
-        while offset != 0:
-            offset -= 1
-            ptr = ptr.next
-        self.insert(node, ptr)
-
-    def find(self, key:int):
-        curr = self.head
-        while curr.val != key:
-            curr = curr.next
-        self.pointer = curr
-        return curr
-
-    def advance(self, offset:int):
-        while offset > 0:
-            offset -= 1
-            self.pointer = self.pointer.next
-        return self.pointer.val
-
-    def pointerVal(self) -> int:
-        return self.pointer.val
+from collections import deque, namedtuple
 
 
 class Solution(IntSplitSolution):
     _year = 2022
     _day = 20
 
+    def decrypt(self, key = 1, mixes = 1) -> int:
+        solution = 0
+        EncryptNode = namedtuple('Node', ['index', 'shift'])
+        instructions = deque([EncryptNode(i, shift * key) for i, shift in enumerate(self.input)])
+        for _ in range(mixes):
+            for i in range(len(self.input)):
+                while instructions[-1].index != i:
+                    instructions.rotate(1)
+                currInstruction = instructions.pop()
+                instructions.rotate(-currInstruction.shift)
+                instructions.append(currInstruction)
+        
+        while instructions[0].shift != 0:
+            instructions.rotate(1)
+
+        for i in range(1,4):
+            solution += instructions[i * 1000 % len(instructions)].shift
+
+        return solution
+
     # @answer(1234)
     def part_1(self) -> int:
         pass
-
+        
     # @answer(1234)
     def part_2(self) -> int:
         pass
 
-    # @answer((1234, 4567))
+    @answer((19070, 14773357352059))
     def solve(self) -> tuple[int, int]:
-        ENCRYPTION_KEY = 811589153
-        part1 = 0
-        part2 = 0
-        nodes = DoublyLinkedList(self.input)
-        assert(all([node.val == num for node, num in zip(nodes.nodes, self.input)]))
-        for i in range(len(self.input)):
-            nodes.shift(i, self.input[i])
-        nodes.find(0)
-        for i in range(3):
-            part1 += nodes.advance(1000)
-            print(nodes.pointer)
+        return self.decrypt(), self.decrypt(811589153, 10)
 
-        nodes = DoublyLinkedList([x * ENCRYPTION_KEY for x in self.input])
-        assert(all([node.val == num * ENCRYPTION_KEY for node, num in zip(nodes.nodes, self.input)]))
-        for _ in range(10):
-            for i in range(len(self.input)):
-                nodes.shift(i, self.input[i])
-        nodes.find(0)
-        print(nodes.pointer)
-        for i in range(3):
-            part2 += nodes.advance(1000)
-            print(nodes.pointer)
-
-        return (part1, part2)
