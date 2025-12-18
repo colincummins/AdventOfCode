@@ -69,6 +69,38 @@ class Solution(StrSplitSolution):
         for line in self.input:
             key, phrase = line.split(": ")
             jungle[key] = Monkey(key, phrase)
+        for monkey in jungle.values():
+            for neighbor in monkey.getWaiting():
+                neighbors[neighbor].append(monkey)
+
+        q = deque(filter(lambda x: x.inDegree == 0, jungle.values()))
+
+        while q:
+            curr = q.popleft()
+            for neighbor in neighbors[curr.key]:
+                neighbor.listen(*curr.shout())
+                if neighbor.inDegree == 0:
+                    q.append(neighbor)
+
+        print("Final queue:", q)
+
+        return jungle["root"].num
+
+
+            
+
+
+
+
+    # @answer(1234)
+    def part_2(self) -> int:
+        neighbors = defaultdict(list)
+        jungle = {}
+        for line in self.input:
+            key, phrase = line.split(": ")
+            if key == "humn":
+                continue
+            jungle[key] = Monkey(key, phrase)
         print("Jungle:", jungle.values())
         for monkey in jungle.values():
             for neighbor in monkey.getWaiting():
@@ -90,18 +122,10 @@ class Solution(StrSplitSolution):
                     q.append(neighbor)
 
         print("Final queue:", q)
-
-        return jungle["root"].num
-
-
-            
+        print(vars(jungle["root"]))
+        print("Monkeys:", [vars(x) if x.number is None else None for x in jungle.values()])
 
 
-
-
-    # @answer(1234)
-    def part_2(self) -> int:
-        pass
 
     # @answer((1234, 4567))
     # def solve(self) -> tuple[int, int]:
