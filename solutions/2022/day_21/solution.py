@@ -62,7 +62,7 @@ class Monkey():
         return (self.waiting1, self.waiting2) if self.waiting1 and self.waiting2 else [] 
 
     def __repr__(self):
-        return self.key
+        return "<name: {} | num: {}>".format(self.key, self.num)
 
     def __lt__(self, other) -> bool:
         return self.inDegree < other.inDegree
@@ -77,46 +77,55 @@ class Monkey():
 
         if self.num is None:
             self.num = leftSide
+
         print(vars(self))
+        """
+{'key': 'plzp', 'num': Fraction(48165982835110, 1), 'waiting1': 'nmsp', 'waiting2': 'lsdl', 'inDegree': 1, 'operation': <class 'fractions.Fraction'>, 'lsdl': 9}
+nmsp resolved to None
+
+        """
         a, b = getattr(self, self.waiting1, None), getattr(self, self.waiting2, None)
-        print("a, b",a, b)
+        print("a: {}, b: {}".format(a, b))
         if a is not None:
             match self.operation:
-                # leftSide = self.waiting2 + x -> x = leftSide - self.waiting2
                 case operator.add:
+                    # leftside = a + b =>
                     b = leftSide - a
 
-                # leftSide = self.waiting2 - x -> x = self.waiting2 - leftSide
                 case operator.sub:
+                    # leftside = a - b =>
                     b = a - leftSide
 
-                # leftSide = self.waiting2 * x -> x = leftSide / self.waiting2
                 case operator.mul:
+                    # leftside = a * b =>
                     b = Fraction(leftSide, a)
 
-                # leftSide = self.waiting2 / x -> x = self.waiting1 / leftSide
                 case operator.truediv:
+                    # leftside = a / b =>
                     b = Fraction(a, leftSide)
+            print("b = {}".format(a))
             setattr(self, self.waiting2, b)
             print("{} resolved to {}".format(self.waiting2,getattr(self, self.waiting2)))
 
         elif b is not None:
             match self.operation:
-                # leftSide = self.waiting2 + x -> x = leftSide - self.waiting2
+                # solving for a
                 case operator.add:
+                    # leftside = a + b =>
                     a = leftSide - b
 
-                # leftSide = self.waiting2 - x -> x = self.waiting2 - leftSide
                 case operator.sub:
-                    a = b - leftSide
+                    # leftside = a - b =>
+                    a = b + leftSide
 
-                # leftSide = self.waiting2 * x -> x = leftSide / self.waiting2
                 case operator.mul:
+                    # leftside = a * b =>
                     a = Fraction(leftSide, b)
 
-                # leftSide = self.waiting2 / x -> x = self.waiting1 / leftSide
                 case operator.truediv:
-                    a = Fraction(b, leftSide)
+                    # leftside = a / b =>
+                    a = leftSide * b
+            print("a = {}".format(a))
             setattr(self, self.waiting1, a)
             print("{} resolved to {}".format(self.waiting1,getattr(self, self.waiting1)))
 
@@ -124,10 +133,6 @@ class Monkey():
             raise ValueError("Monkey has no attributes and can't solve")
 
             print("{} value1 is {}".format(self, getattr(self, self.waiting2)))
-
-        self.inDegree -= 1
-        assert(self.num is not None)
-        assert(self.key != "humn")
 
 
 
@@ -167,58 +172,43 @@ class Solution(StrSplitSolution):
 
     # @answer(1234)
     def part_2(self) -> int:
+        ANSWERNODE = "humn"
         neighbors = defaultdict(set)
         jungle = {}
         for line in self.input:
             key, phrase = line.split(": ")
+            if key == ANSWERNODE:
+                print("Ignoring humn")
+                continue
             jungle[key] = Monkey(key, phrase)
         jungle["root"].setOperator("=")
         for monkey in jungle.values():
             for neighbor in monkey.getWaiting():
                 neighbors[neighbor].add(monkey)
 
-        jungle["humn"].inDegree = float("inf")
-
         q = deque(filter(lambda x: x.inDegree == 0, jungle.values()))
-        print(q)
 
         while q:
-            curr = q.pop()
+            curr = q.popleft()
             for neighbor in neighbors[curr.key]:
-                print("{} shouts {} to {}".format(*curr.shout(), neighbor.key))
                 neighbor.listen(*curr.shout())
                 if neighbor.inDegree == 0:
-                    print("Neighbor {} has calculated their number: {}".format(neighbor.key, neighbor.num))
                     q.append(neighbor)
 
-        print("root has a value of {}. Attempting to resolve...".format(jungle["root"].num))
+        print(jungle)
 
-        heap = [jungle["root"]]
-        print(vars(jungle["root"]))
+        q = deque([jungle["root"]])
+        while q:
+            curr = q.pop()
+            for ancestor in [curr.waiting1, curr.waiting2]:
+                if ancestor == ANSWERNODE:
+                    return curr.num
+                if ancestor is not None:
+                    ancestor = jungle[ancestor] 
+                    ancestor.solveEquation(curr.num)
+                    q.append(ancestor)
 
-        while heap:
-            curr = heappop(heap)
-            print("Popped {} from heap".format(curr))
-            print(vars(curr))
-            assert(curr.num is not None)
-            for neighbor in [curr.waiting1, curr.waiting2]:
-                if neighbor is not None:
-                    neighbor = jungle[neighbor]
-                    print("{} interacting with {}".format(curr, neighbor))
-                    if neighbor.inDegree > 0:
-                        print("{} is passing {} to {} for a solution".format(curr, curr.num, neighbor))
-                        neighbor.solveEquation(curr.num)
-                        heappush(heap, neighbor)
-                    print(heap)
-
-        print("Final queue:", q)
-        print("root:",vars(jungle["root"]))
-        print("humn:",vars(jungle["humn"]))
-
-
-
-        return jungle["humn"].num
-
+        return 0
     # @answer((1234, 4567))
     # def solve(self) -> tuple[int, int]:
     #     pass
