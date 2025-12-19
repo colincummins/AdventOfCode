@@ -1,0 +1,6 @@
+Ignoring humn
+<name: root | num: 48165982835110> is calling qhbp
+<name: qhbp | num: None> is solving an equation for None
+{'key': 'qhbp', 'num': None, 'waiting': ['wpfw', 'jmws'], 'numDict': defaultdict(<function Monkey.__init__.<locals>.<lambda> at 0x7fe71bb56020>, {'jmws': Fraction(2, 1)}), 'operation': <built-in function mul>} attributes:
+{'key': 'qhbp', 'num': None, 'waiting': ['wpfw', 'jmws'], 'numDict': defaultdict(<function Monkey.__init__.<locals>.<lambda> at 0x7fe71bb56020>, {'jmws': Fraction(2, 1), 'wpfw': None}), 'operation': <built-in function mul>}
+a: None, b: 2
