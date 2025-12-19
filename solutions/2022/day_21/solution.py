@@ -70,6 +70,8 @@ class Monkey():
         return self.inDegree < other.inDegree
 
     def solveEquation(self, leftSide: int):
+        if self.num is None:
+            self.num = leftSide
         print("{} is solving an equation for {}".format(self, leftSide))
         if self.waiting1 is not None and self.waiting2 and self.waiting2 is not None and hasattr(self, self.waiting1) and hasattr(self, self.waiting2):
             print("{} is already solved".format(self))
@@ -87,11 +89,11 @@ class Monkey():
 
                 # leftSide = self.waiting1 * x -> x = leftSide / self.waiting1
                 case operator.mul:
-                    self.__setattr__(self.waiting2, Ratio(leftSide, getattr(self, self.waiting1)))
+                    self.__setattr__(self.waiting2, Fraction(leftSide, getattr(self, self.waiting1)))
 
                 # leftSide = self.waiting1 / x -> x = self.waiting1 / leftSide
                 case operator.truediv:
-                    self.__setattr__(self.waiting2, Ratio(getattr(self, self.waiting1), leftSide))
+                    self.__setattr__(self.waiting2, Fraction(getattr(self, self.waiting1), leftSide))
 
             print("{} value1 is {}".format(self, getattr(self, self.waiting1)))
 
@@ -107,15 +109,16 @@ class Monkey():
 
                 # leftSide = self.waiting2 * x -> x = leftSide / self.waiting2
                 case operator.mul:
-                    self.__setattr__(self.waiting1, Ratio(leftSide, getattr(self, self.waiting2)))
+                    self.__setattr__(self.waiting1, Fraction(leftSide, getattr(self, self.waiting2)))
 
                 # leftSide = self.waiting2 / x -> x = self.waiting1 / leftSide
                 case operator.truediv:
-                    self.__setattr__(self.waiting1, Ratio(getattr(self, self.waiting2), leftSide))
+                    self.__setattr__(self.waiting1, Fraction(getattr(self, self.waiting2), leftSide))
 
             print("{} value1 is {}".format(self, getattr(self, self.waiting2)))
 
         self.inDegree -= 1
+        assert(self.num is not None)
 
 
 
@@ -190,21 +193,25 @@ class Solution(StrSplitSolution):
         while heap:
             curr = heap.pop()
             print("Popped {} from heap".format(curr))
+            print(vars(curr))
             assert(curr.num is not None)
             for neighbor in [curr.waiting1, curr.waiting2]:
                 if neighbor is not None:
                     neighbor = jungle[neighbor]
-                    print("{} is passing {} to {} for a solution".format(curr, curr.num, neighbor))
-                    neighbor.solveEquation(curr.num)
-                    heappush(heap, neighbor)
+                    if neighbor.inDegree > 0:
+                        print("{} is passing {} to {} for a solution".format(curr, curr.num, neighbor))
+                        neighbor.solveEquation(curr.num)
+                        heappush(heap, neighbor)
+                    print(heap)
 
         print("Final queue:", q)
         print("root:",vars(jungle["root"]))
-        print("humn:",vars(jungle["root"]))
+        print("humn:",vars(jungle["humn"]))
         print("Monkeys:", [vars(x) if x.num is None else None for x in jungle.values()])
 
-        return 0
+        
 
+        return jungle["humn"].num
 
     # @answer((1234, 4567))
     # def solve(self) -> tuple[int, int]:
