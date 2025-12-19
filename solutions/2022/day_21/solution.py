@@ -207,9 +207,8 @@ class Solution(StrSplitSolution):
         print("Final queue:", q)
         print("root:",vars(jungle["root"]))
         print("humn:",vars(jungle["humn"]))
-        print("Monkeys:", [vars(x) if x.num is None else None for x in jungle.values()])
 
-        
+
 
         return jungle["humn"].num
 
