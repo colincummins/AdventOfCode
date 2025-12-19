@@ -19,7 +19,7 @@ class Monkey():
             self.inDegree = 0
             self.num = int(phrase)
             self.waiting1 = self.waiting2 = None
-            self.operator = None
+            self.operation = None
             self.isNumber = True
             return
 
@@ -70,7 +70,8 @@ class Monkey():
     def solveEquation(self, leftSide: int):
         print("{} is solving an equation for {}".format(self, leftSide))
         print("{} attributes:".format(vars(self)))
-        if self.waiting1 is None and self.waiting2 is None:
+        if self.operation is None:
+            self. num = leftSide
             print("{} is already solved".format(self))
             return
 
@@ -196,7 +197,7 @@ class Solution(StrSplitSolution):
         print(vars(jungle["root"]))
 
         while heap:
-            curr = heap.pop()
+            curr = heappop(heap)
             print("Popped {} from heap".format(curr))
             print(vars(curr))
             assert(curr.num is not None)
