@@ -17,7 +17,7 @@ class Monkey():
         self.numDict = defaultdict(lambda: None)
 
         if bool(fullmatch(r"^-?\d+$", phrase)):
-            self.num = int(phrase)
+            self.num = Fraction(phrase)
             self.operation = None
             self.isNumber = True
         else:
@@ -75,6 +75,13 @@ class Monkey():
 
         if self.operation == self.equalityOperator:
             self.num = value
+            if self.leftVal:
+                self.rightVal = value
+            elif self.rightVal:
+                self.leftVal = value
+            if self.leftVal and self.rightVal:
+                assert(self.leftVal == self.rightVal)
+
         elif self.inDegree == 0:
             self.num = self.operation(self.leftVal, self.rightVal )
 
@@ -92,19 +99,18 @@ class Monkey():
     def solveEquation(self, inherited: int):
         print("{} is solving an equation for {}".format(self, inherited))
         print("{} attributes:".format(vars(self)))
-        
         # Check for nodes which are already full resolved = val and both waiting values
         a, b = self.leftVal, self.rightVal
 
-        if self.operation is None or (a is not None and b is not None):
+        if self.num is not None or (a is not None and b is not None):
             assert(self.num == inherited)
             self.num = inherited
             print("{} is already solved".format(self))
             return
 
+        print("Assigning {} to empty num slot".format(self.num))
         self.num = inherited
-
-        print(vars(self))
+        print("{} attributes:".format(vars(self)))
         print("a: {}, b: {}".format(a, b))
         if a is not None:
             match self.operation:
@@ -163,7 +169,7 @@ class Solution(StrSplitSolution):
 
 
 
-    # @answer(1234)
+    @answer(155708040358220)
     def part_1(self) -> int:
         neighbors = defaultdict(list)
         jungle = {}
@@ -186,7 +192,7 @@ class Solution(StrSplitSolution):
         return jungle["root"].num
 
 
-    # @answer(1234)
+    @answer(3342154812537)
     def part_2(self) -> int:
         ANSWERNODE = "humn"
         neighbors = defaultdict(set)
@@ -214,22 +220,20 @@ class Solution(StrSplitSolution):
 
         # create human node to catch answer
         human = Monkey("humn","0 = 0")
-        human.operation = None
-        human.waiting1 = human.waiting2 = None
         jungle["humn"] = human
 
         q = deque([jungle["root"]])
         while q:
             curr = q.pop()
-            for ancestor in curr.waiting:
-                if ancestor is not None:
-                    print("{} is calling {}".format(curr, ancestor))
-                    ancestor = jungle[ancestor] 
-                    ancestor.solveEquation(curr.num)
-                    q.append(ancestor)
+            for ancestorKey in curr.waiting:
+                print("{} is calling {}".format(curr, ancestorKey))
+                ancestor = jungle[ancestorKey] 
+                if ancestorKey == ANSWERNODE:
+                    return curr.numDict[ancestorKey]
+                ancestor.solveEquation(curr.numDict[ancestorKey])
+                q.append(ancestor)
 
 
-        return jungle["humn"].num
     # @answer((1234, 4567))
     # def solve(self) -> tuple[int, int]:
     #     pass
