@@ -29,11 +29,18 @@ class Solution(StrSplitSolution):
 
         return lights, buttons, joltages
 
+    def parseLine2(self, line):
+        elements = line.split(" ")
+        joltages = tuple(map(int, elements[-1].strip("{}").split(",")))
+        buttons = []
+        for button in elements[1:-1]:
+            buttonArray = [0] * len(joltages)
+            registersTripped =  map(int, button.strip("()").split(","))
+            for reg in registersTripped:
+                buttonArray[reg] = 1
+            buttons.append(buttonArray)
 
-    def getAstar(self, joltages: tuple[int]) -> int:
-        return (sum(map(lambda x: x**2, joltages)))**(1/len(joltages))
-
-
+        return buttons, joltages
 
 
     # @answer(1234)
@@ -66,29 +73,28 @@ class Solution(StrSplitSolution):
 
         part2 = 0
         for line in self.input:
-            self.debug(line)
-        """
-        @cache
-        def recNumPresses(remainingJoltage: tuple[int]) -> int:
-            if any([x < 0 for x in remainingJoltage]):
-                return inf
-            if all([x == 0 for x in remainingJoltage]):
-                return 0
+            buttons, joltages = self.parseLine2(line)
+
+            @cache
+            def recNumPresses(remainingJoltage: tuple[int]) -> int:
+                if any([x < 0 for x in remainingJoltage]):
+                    return inf
+                if all([x == 0 for x in remainingJoltage]):
+                    return 0
 
 
-        assert recNumPresses((0,0,0,0)) == 0
-        assert recNumPresses((-1,0,0,0)) == inf
-        for _, buttons, joltages in self.input:
+            assert recNumPresses((0,0,0,0)) == 0
+            assert recNumPresses((-1,0,0,0)) == inf
+
             recNumPresses.cache_clear()
             self.debug("New Line:")
-            self.debug("Buttons{}".format(buttons))
+            self.debug(buttons, joltages)
 
 
 
 
 
-            # Remember - no negative joltages allowed
-        """
+                # Remember - no negative joltages allowed
 
 
         return (part1, part2)
