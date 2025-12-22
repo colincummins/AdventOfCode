@@ -3,10 +3,11 @@
 # puzzle prompt: https://adventofcode.com/2025/day/10
 
 from ...base import StrSplitSolution, answer
-from collections import deque, defaultdict
-from heapq import heappush, heappop
+from collections import deque
 from math import inf
 from functools import cache
+from itertools import combinations
+from numpy import array
 
 
 class Solution(StrSplitSolution):
@@ -38,21 +39,13 @@ class Solution(StrSplitSolution):
             registersTripped =  map(int, button.strip("()").split(","))
             for reg in registersTripped:
                 buttonArray[reg] = 1
-            buttons.append(buttonArray)
+            buttons.append(array(buttonArray))
 
         return buttons, joltages
 
 
-    # @answer(1234)
+    @answer(401)
     def part_1(self) -> int:
-        pass
-
-    # @answer(1234)
-    def part_2(self) -> int:
-        pass
-
-    @answer((401, 0))
-    def solve(self) -> tuple[int, int]:
         part1 = 0
         for line in self.input:
             lights, buttons, joltages = self.parseLine1(line)
@@ -68,12 +61,16 @@ class Solution(StrSplitSolution):
                     break
                 for button in buttons:
                     q.append((steps + 1, button ^ curr))
+        return part1
 
-        #part 2
-
-        part2 = 0
+    # @answer(1234)
+    def part_2(self) -> int:
+        part2solution = 0
         for line in self.input:
             buttons, joltages = self.parseLine2(line)
+
+            buttonCombos = [a + b for a, b in combinations(buttons, 2)]
+            self.debug("2-Button Combos", buttonCombos)
 
             @cache
             def recNumPresses(remainingJoltage: tuple[int]) -> int:
@@ -90,12 +87,9 @@ class Solution(StrSplitSolution):
             self.debug("New Line:")
             self.debug(buttons, joltages)
 
+        return part2solution 
 
-
-
-
-                # Remember - no negative joltages allowed
-
-
-        return (part1, part2)
+    # @answer((0, 0))
+    # def solve(self) -> tuple[int, int]:
+    #   pass 
 
