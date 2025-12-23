@@ -7,7 +7,7 @@ from collections import deque
 from math import inf
 from functools import cache
 from itertools import combinations
-from numpy import array
+from numpy import array, dot
 
 
 class Solution(StrSplitSolution):
@@ -44,9 +44,10 @@ class Solution(StrSplitSolution):
         return buttons, joltages
 
     @staticmethod
-    def divideArray(numerator, denominator):
-        if ~((denominator == 0) & (numerator > 0)).any() and (numerator % denominator == 0).all():
-            return numerator[0] // denominator[0]
+    def divideArray(num, denom):
+        if dot(num, denom) == dot(denom, num):
+            return dot(num, denom)/dot(denom, denom)
+            
         
         return -1
 
