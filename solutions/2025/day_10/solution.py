@@ -5,30 +5,38 @@
 from ...base import StrSplitSolution, answer
 from collections import deque
 from math import inf
-from functools import cache
 from itertools import combinations
-from numpy import array, dot, linalg, cross
+from numpy import array, int64
 from collections import defaultdict
 
 
 class ComboDict():
     def __init__(self, buttons):
-        self.dict = {}
+        self.dict = defaultdict(list)
         allCombos = []
         for i in range(1, len(buttons[0] + 1)):
             allCombos.extend([(i, sum(combo)) for combo in combinations(buttons,i)])
 
+        print("Combos, pre-fiter:")
+        print(*allCombos, sep="\n")
+
         allCombos.sort(key = lambda x: (list(x[1]), x[0]))
 
-        stack = [allCombos.pop()]
+        self.stack = [allCombos.pop()]
         for length, combo in allCombos:
-            signature = tuple((combo > 0))
-            if self.dict.get(signature) is None:
-                self.dict[signature] = length, combo
-        
+            if (combo != self.stack[-1][1]).any():
+                self.stack.append((length, combo))
 
-        print(*self.dict.values(), sep="\n")
-        print(len(self.dict))
+        self.stack.sort(reverse = True, key = lambda x: sum(x[1]))
+
+        print("Available combos:")
+        print(*self.stack, sep="\n")
+
+    def values(self):
+        return self.stack
+
+
+
 
 
 class Solution(StrSplitSolution):
@@ -60,7 +68,7 @@ class Solution(StrSplitSolution):
             registersTripped =  map(int, button.strip("()").split(","))
             for reg in registersTripped:
                 buttonArray[reg] = 1
-            buttons.append(array(buttonArray))
+            buttons.append(array(buttonArray, dtype=int64))
 
         return buttons, joltages
 
@@ -81,6 +89,31 @@ class Solution(StrSplitSolution):
             return factors[0]
 
         return -1
+
+    def recNumPresses(self, stepsTaken, remainingJoltage) -> None:
+        assert(not any([x < 0 for x in remainingJoltage]))
+
+        if stepsTaken >= self.memo[*remainingJoltage]:
+            return
+
+        self.memo[*remainingJoltage] = stepsTaken
+            
+        remainingJoltage = array(remainingJoltage, dtype=int64)
+
+        if (remainingJoltage == 0).all():
+            print("FOUND ZERO")
+            self.memo[*remainingJoltage] = stepsTaken
+            self.shortestPathToZero = min(self.shortestPathToZero, stepsTaken)
+            return
+        
+        signature = tuple((remainingJoltage > 0))
+        for currSteps, combo in self.comboDict.values():
+            multiplier = 1
+            while all([a >= b for a, b in zip(remainingJoltage, combo * multiplier)]):
+                self.recNumPresses(stepsTaken + currSteps, remainingJoltage - combo * multiplier)
+                multiplier *= 2
+                currSteps *= 2
+
 
     @answer(401)
     def part_1(self) -> int:
@@ -103,7 +136,7 @@ class Solution(StrSplitSolution):
 
     # @answer(1234)
     def part_2(self) -> int:
-        solution = 0
+        """
         divisible = array([2, 1, 1, 2])
         badMultiplied = array([2, 2, 4, 4])
         multiplied = array([4, 2, 2, 4])
@@ -117,60 +150,25 @@ class Solution(StrSplitSolution):
         print(self.divideArray(divisibleZero, comboZero))
         print(self.divideArray(multiplied, divisible))
         print("Bad multiplier",self.divideArray(badMultiplied, divisible))
-
-        part2solution = 0
-        for line in self.input:
-            buttons, joltages = self.parseLine2(line)
-            combosByCoverage = ComboDict(buttons)
-
-            self.debug("2-Button Combos", combosByCoverage)
-
-        return
-
         """
-            # Only use combos that cover every non-zero element
-            # Filter combos further - there are some identical combos of different lengths, only keep the shortest
+        part2answer = 0
+        for line in self.input:
+            self.shortestPathToZero = inf
+            buttons, joltages = self.parseLine2(line)
+            self.memo = defaultdict(lambda: inf)
+            self.comboDict = ComboDict(buttons)
 
-            @cache
-            def recNumPresses(remainingJoltage: tuple[int]) -> int:
-                remainingJoltage = array(remainingJoltage)
+            self.debug("Combo Dictionary", self.comboDict)
+            self.recNumPresses(0, joltages)
+            part2answer += self.shortestPathToZero
 
-                if any([x < 0 for x in remainingJoltage]):
-                    return inf
-                if all([x == 0 for x in remainingJoltage]):
-                    return 0
 
-                for combo in buttonCombos:
-                    dividedJoltage = self.divideArray(remainingJoltage, combo)
-                    if dividedJoltage > 0:
-                        return 2 * dividedJoltage
-
-                for button in buttons:
-                    dividedJoltage = self.divideArray(remainingJoltage, button)
-                    if dividedJoltage > 0:
-                        return dividedJoltage
-
-                return 2 + min([recNumPresses(tuple(remainingJoltage - combo)) for combo in buttonCombos])
+        return part2answer
 
 
 
 
-
-
-
-            assert recNumPresses((0,0,0,0)) == 0
-            assert recNumPresses((-1,0,0,0)) == inf
-
-            recNumPresses.cache_clear()
-            self.debug("New Line:")
-            self.debug(buttons, joltages)
-
-            solution += recNumPresses(joltages)
-            print(solution)
-
-        return solution 
 
     # @answer((0, 0))
     # def solve(self) -> tuple[int, int]:
     #   pass 
-"""
