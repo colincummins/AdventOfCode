@@ -94,7 +94,7 @@ class Solution(StrSplitSolution):
         return 0
 
 
-    def recNumPresses(self, stepsTaken, remainingJoltage) -> None:
+    def recNumPresses(self, stepsTaken, remainingJoltage, comboPointer) -> None:
         assert(not any([x < 0 for x in remainingJoltage]))
 
         if stepsTaken >= self.memo[*remainingJoltage] or stepsTaken >= self.shortestPathToZero:
@@ -111,18 +111,17 @@ class Solution(StrSplitSolution):
             return
         
         signature = tuple((remainingJoltage > 0))
-        for currSteps, combo in self.comboDict.values():
-            factor = self.divideArray(remainingJoltage, combo)
-            if factor > 0:
-                print("shortcut")
-                self.recNumPresses(stepsTaken + factor * currSteps, [0])
-                continue
+        currSteps, combo = self.comboDict.values()[comboPointer]
+        print(self.comboDict.values()[comboPointer])
 
-            multiplier = 1
-            while all([a >= b for a, b in zip(remainingJoltage, combo * multiplier)]):
-                self.recNumPresses(stepsTaken + currSteps, remainingJoltage - combo * multiplier)
-                multiplier *= 2
-                currSteps *= 2
+        factor = self.divideArray(remainingJoltage, combo)
+
+        multiplier = 1
+        while all([a >= b for a, b in zip(remainingJoltage, combo * multiplier)]):
+            self.recNumPresses(stepsTaken + currSteps * multiplier, remainingJoltage - combo * multiplier, comboPointer + 1)
+            multiplier += 1
+
+        self.recNumPresses(stepsTaken, remainingJoltage, comboPointer + 1)
 
 
     @answer(401)
@@ -169,7 +168,7 @@ class Solution(StrSplitSolution):
             self.comboDict = ComboDict(buttons)
 
             self.debug("Combo Dictionary", self.comboDict)
-            self.recNumPresses(0, joltages)
+            self.recNumPresses(0, joltages, 0)
             part2answer += self.shortestPathToZero
 
 
