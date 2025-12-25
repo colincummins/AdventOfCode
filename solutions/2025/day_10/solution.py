@@ -77,23 +77,27 @@ class Solution(StrSplitSolution):
         factors = []
         for a, b in zip(num, denom):
             if a != 0 and b == 0:
-                return -1
+                return 0
 
             if a and a % b != 0:
-                return -1
+                return 0
 
+            if a < b:
+                return 0
+                
             if a and b:
                 factors.append(a//b)
 
         if len(set(factors)) == 1:
             return factors[0]
 
-        return -1
+        return 0
+
 
     def recNumPresses(self, stepsTaken, remainingJoltage) -> None:
         assert(not any([x < 0 for x in remainingJoltage]))
 
-        if stepsTaken >= self.memo[*remainingJoltage]:
+        if stepsTaken >= self.memo[*remainingJoltage] or stepsTaken >= self.shortestPathToZero:
             return
 
         self.memo[*remainingJoltage] = stepsTaken
@@ -108,6 +112,12 @@ class Solution(StrSplitSolution):
         
         signature = tuple((remainingJoltage > 0))
         for currSteps, combo in self.comboDict.values():
+            factor = self.divideArray(remainingJoltage, combo)
+            if factor > 0:
+                print("shortcut")
+                self.recNumPresses(stepsTaken + factor * currSteps, [0])
+                continue
+
             multiplier = 1
             while all([a >= b for a, b in zip(remainingJoltage, combo * multiplier)]):
                 self.recNumPresses(stepsTaken + currSteps, remainingJoltage - combo * multiplier)
