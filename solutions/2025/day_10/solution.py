@@ -16,6 +16,7 @@ class Solution(StrSplitSolution):
     _day = 10
 
     def createComboDict(self, buttons):
+        print(buttons)
         dict = defaultdict(list)
         allCombos = []
         for i in range(1, len(buttons[0] + 1)):
