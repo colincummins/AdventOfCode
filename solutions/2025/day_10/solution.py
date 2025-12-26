@@ -19,11 +19,9 @@ class Solution(StrSplitSolution):
         print(buttons)
         dict = defaultdict(list)
         allCombos = []
+        allCombos.append(tuple([0] * (len(buttons[0]) + 1)))
         for i in range(1, len(buttons[0] + 1)):
             allCombos.extend([(i, *sum(combo)) for combo in combinations(buttons,i)])
-        
-        allCombos.append(tuple([0] * (len(buttons[0]) + 1)))
-
 
         allCombos.sort(key = lambda x: (x[1:], x[0] ))
         
