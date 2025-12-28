@@ -11,7 +11,23 @@ class Solution(StrSplitSolution):
 
     # @answer(1234)
     def part_1(self) -> int:
-        pass
+        goodRegions = 0
+        for line in self.input:
+            if "x" in line:
+                dimensions, packageCounts = line.split(": ")
+                dimensions = list(map(int,dimensions.split("x")))
+                packageCounts = list(map(int, packageCounts.split(" ")))
+                print("Dimensions: {}".format(dimensions))
+                print("Package Counts: {}".format(packageCounts))
+
+                if sum(packageCounts) * 7 <= dimensions[0] * dimensions[1]:
+                    print("Optimum packing possible")
+                    goodRegions += 1
+
+
+
+        return(goodRegions)
+
 
     # @answer(1234)
     def part_2(self) -> int:
